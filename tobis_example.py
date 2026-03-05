@@ -31,7 +31,8 @@ run_opendrift(
     horizontal_diffusivity=0,
     coastline='Model',
     vertical_mixing=False,
-    N=1
+    N=1,
+    particle_type='LarvalFish'
 )
 lon, lat = 6.118, 62.195
 #run_opendrift(

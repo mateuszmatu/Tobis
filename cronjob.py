@@ -15,5 +15,6 @@ run_opendrift(
     horizontal_diffusivity=0,
     coastline='Model',
     vertical_mixing=False,
-    N=1000
+    N=1000,
+    particle_type='LarvalFish'
 )
