@@ -128,24 +128,34 @@ def run_opendrift(file, lon, lat, z=0, N=1, radius=0, start_time=None, duration=
           time_step_output=timedelta(minutes=time_step_output),
           outfile=outfile
           )
-
+    
     if density_grid is not None and isinstance(density_grid, int):
-        import trajan
-        import xarray as xr
-        ds = xr.open_dataset(outfile)
-        os.system(f'rm {outfile}')
-        grid = ds.traj.make_grid(dx=density_grid)
-        ds_c = ds.traj.concentration(grid)
-        ds = ds.assign_coords({
-        "c_lon": ds_c.lon.values, 
-        "c_lat": ds_c.lat.values
-        })
-        ds = ds.assign({
-            "number": (['time', 'c_lat', 'c_lon'], ds_c.number.values),
-            "cell_area": (['c_lat', 'c_lon'], ds_c.cell_area.values),
-            "number_area_concentration": (['time', 'c_lat', 'c_lon'], ds_c.number_area_concentration.values),
-        })
-        ds.to_netcdf(outfile)
+        concentration(outfile, density_grid)
+
+def concentration(file, density_grid):
+    """
+        Creates a concentration field of particles from OpenDrift run adds it to OpenDrift netcdf file. 
+    Args:
+        file            [str]   :   An OpenDrift output file. 
+        density_grid    [int]   :   Grid size in the concentration field. 
+    """
+    import trajan
+    import xarray as xr
+    ds = xr.open_dataset(file)
+    os.system(f'rm {file}')
+    grid = ds.traj.make_grid(dx=density_grid)
+    ds_c = ds.traj.concentration(grid)
+    ds = ds.assign_coords({
+    "c_lon": ds_c.lon.values, 
+    "c_lat": ds_c.lat.values
+    })
+    ds = ds.assign({
+        "number": (['time', 'c_lat', 'c_lon'], ds_c.number.values),
+        "cell_area": (['c_lat', 'c_lon'], ds_c.cell_area.values),
+        "number_area_concentration": (['time', 'c_lat', 'c_lon'], ds_c.number_area_concentration.values),
+    })
+    ds.to_netcdf(file)
+    return ds
 
 if __name__ == "__main__":
     #TODO allow a list of lons, lats and z
