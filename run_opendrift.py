@@ -8,8 +8,9 @@ from opendrift.models.oceandrift import OceanDrift
 
 from datetime import datetime, timedelta
 import os
+import numpy as np
 
-def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, radius=0, start_time=None, duration=12, time_step=30, time_step_output=60, outfile='sample_file.nc', depth_type='z', vertical_mixing=False, horizontal_diffusivity=0, coastline=None, track_vars=None, density_grid=None):
+def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, radius=0, start_time=None, duration=12, time_step=30, time_step_output=60, outfile='sample_file.nc', depth_type='z', vertical_mixing=False, vertical_advection=False, horizontal_diffusivity=0, coastline=None, track_vars=None, density_grid=None, max_age_seconds=None):
     """
         A wrapper for running OpenDrift. https://opendrift.github.io/
     Args:
@@ -39,7 +40,6 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
             raise TypeError('Argument track_vars must be either a string or a list of strings.')
         
         else:
-            import numpy as np
             for var in track_vars:
                 OceanDrift.required_variables.update(
                     {
@@ -48,7 +48,7 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
                 )
     
     o = OceanDrift(
-        loglevel=30,
+        loglevel=50,
         seed=0
     )
 
@@ -92,8 +92,12 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
     o.set_config('general:coastline_action', 'previous')
     o.set_config('drift:horizontal_diffusivity', horizontal_diffusivity)
     o.set_config('drift:vertical_mixing', vertical_mixing)
+    o.set_config('drift:vertical_advection', vertical_advection)
     o.set_config('vertical_mixing:diffusivitymodel', 'environment')
     o.set_config('drift:advection_scheme', 'runge-kutta4')
+    
+    if max_age_seconds is not None:
+        o.set_config('drift:max_age_seconds', max_age_seconds)
 
     if start_time is None:
         start_time = [r[0].start_time]
@@ -121,39 +125,36 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
     #Ask Knut-Frode for some tips here, so that I don't seed with a for loop
     if lon is not None and lat is not None:
         print('Using positions from provided lon lat')
-        for t in start_time:
-            o.seed_elements(lon=lon,
-                            lat=lat,
-                            z=z*N,
-                            number=N*len(z),
-                            radius=radius,
-                            time=t)
+        o.seed_elements(lon=lon,
+                        lat=lat,
+                        z=z*N,
+                        number=N*len(z)*len(start_time),
+                        radius=radius,
+                        time=start_time)
     elif rls is not None:
         import pandas as pd
         print('Using positions from provided .rls file')
         #From Knut-Frode, testing with provided file
         p = pd.read_csv(rls, sep='\t', names=['time', 'lon', 'lat', 'a'])
-        if start_time is None:
-            start_time = pd.to_datetime(p['time']).dt.to_pydatetime()
+        
+        start_time = pd.to_datetime(p['time']).dt.to_pydatetime()
+
         for _z in z:
             o.seed_elements(lon=p['lon'],
                             lat=p['lat'],
                             time=start_time,
                             z=_z)
-        #o.seed_elements(lon=p['lon'], lat=p['lat'], time=pd.to_datetime(p['time']).dt.to_pydatetime())
 
-    #this seems to be slower than rls    
     elif geojson is not None:
         print('Using positions from provided .geojson file')
         #From Knut-Frode
         import geopandas as gdp
         gdf = gdp.read_file(geojson)
-        for _z in z:
-            for t in start_time:
-                o.seed_from_geopandas(gdf,
-                                    z=_z,
-                                    number=N,
-                                    time=t)
+        for time in start_time:
+            o.seed_from_geopandas(gdf,
+                                z=z*N,
+                                number=N*len(z),
+                                time=time)
         
     o.run(duration=timedelta(hours=duration),
           time_step=timedelta(minutes=time_step),
