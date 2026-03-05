@@ -108,7 +108,7 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
             raise ValueError('Provided start time does not follow required format. Try %Y-%m-%dT%H:%M:%S')
     elif (isinstance(start_time, list) and all(isinstance(item, datetime) for item in start_time) 
         or isinstance(start_time, np.ndarray) and all(isinstance(item, datetime) for item in start_time)):
-        start_time=start_time
+        start_time=list(start_time)
     elif isinstance(start_time, datetime):
         start_time=[start_time]
     else:
@@ -127,10 +127,11 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
         print('Using positions from provided lon lat')
         o.seed_elements(lon=lon,
                         lat=lat,
-                        z=z*N,
+                        z=z*N*len(start_time),
                         number=N*len(z)*len(start_time),
                         radius=radius,
-                        time=start_time)
+                        time=start_time*len(z))
+        
     elif rls is not None:
         import pandas as pd
         print('Using positions from provided .rls file')
@@ -150,11 +151,14 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
         #From Knut-Frode
         import geopandas as gdp
         gdf = gdp.read_file(geojson)
-        for time in start_time:
-            o.seed_from_geopandas(gdf,
-                                z=z*N,
-                                number=N*len(z),
-                                time=time)
+        
+        #this loop could be removed. 
+        for _z in z:
+            for time in start_time:
+                o.seed_from_geopandas(gdf,
+                                    z=_z,
+                                    number=N,
+                                    time=time)
         
     o.run(duration=timedelta(hours=duration),
           time_step=timedelta(minutes=time_step),
