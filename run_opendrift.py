@@ -4,13 +4,12 @@ Author: Mateusz Matuszak
 
 import sys
 sys.path.insert(0, str("submodules/opendrift"))
-from opendrift.models.oceandrift import OceanDrift
 
 from datetime import datetime, timedelta
 import os
 import numpy as np
 
-def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, radius=0, start_time=None, duration=12, time_step=30, time_step_output=60, outfile='sample_file.nc', depth_type='z', vertical_mixing=False, vertical_advection=False, horizontal_diffusivity=0, coastline=None, track_vars=None, density_grid=None, max_age_seconds=None):
+def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, radius=0, start_time=None, duration=12, time_step=30, time_step_output=60, outfile='sample_file.nc', depth_type='z', vertical_mixing=False, vertical_advection=False, horizontal_diffusivity=0, coastline=None, track_vars=None, density_grid=None, max_age_seconds=None, particle_type=None):
     """
         A wrapper for running OpenDrift. https://opendrift.github.io/
     Args:
@@ -32,7 +31,9 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
         track_vars              [str|list]          :   Keep track of additional variables along particle trajectory. NOTE: this variable naming is very strict and predefined in OpenDrift code. See OpenDrift.readers for permitted variables and names. E.g. https://github.com/OpenDrift/opendrift/blob/master/opendrift/readers/reader_ROMS_native.py
         density_grid            [int]               :   Create a density map of particles. This arg specifies grid size for map. 
     """
-    #TODO add more tests for values
+    #TODO consider moving some parts into its own functions as the script is becoming quite long
+    
+    #### Track additional variables #### (KF said there is a better way)
     if track_vars is not None:
         if isinstance(track_vars, str):
             track_vars = [track_vars]
@@ -47,11 +48,23 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
                     }
                 )
     
-    o = OceanDrift(
-        loglevel=50,
-        seed=0
-    )
+    #### Particle Type ####
+    #General tracers
+    if particle_type is None or particle_type == 'tracer':
+        from opendrift.models.oceandrift import OceanDrift
+        o = OceanDrift(
+            loglevel=50,
+            seed=0
+        )
 
+    #Fish Eggs and Larvea
+    if particle_type == 'LarvalFish':
+        from opendrift.models.larvalfish import LarvalFish
+        o = LarvalFish(
+            loglevel=50
+        )
+
+    #### Load reader ####
     if os.path.isdir(file):
         file = file+'/*'
     elif os.path.exists(file) or 'thredds' in file:
@@ -68,6 +81,7 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
     else:
         raise ValueError(f'Supported depth types are [z, s], got {depth_type}')
 
+    #### Landmask ####
     if coastline is not None:
         if isinstance(coastline, str):
             coastline = [coastline]
@@ -84,10 +98,10 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
             from opendrift.readers import reader_shape
             for c in coastline:
                 r.append(reader_shape.Reader.from_shpfiles(c))
-        
                 
     o.add_reader(r)
     
+    #### Config options ####
     o.set_config('general:seafloor_action', 'lift_to_seafloor')
     o.set_config('general:coastline_action', 'previous')
     o.set_config('drift:horizontal_diffusivity', horizontal_diffusivity)
@@ -99,6 +113,7 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
     if max_age_seconds is not None:
         o.set_config('drift:max_age_seconds', max_age_seconds)
 
+    #### Start time ####
     if start_time is None:
         start_time = [r[0].start_time]
     elif isinstance(start_time, str):
@@ -114,12 +129,15 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
     else:
         raise TypeError('Type of start_time is not supported.')
     
+    #### Depth ####
     if isinstance(z, float) or isinstance(z, int):
         z = [z]
     elif isinstance(z, list):
         z = z
     elif isinstance(z, np.ndarray):
         z = list(z)
+
+    #### Seeding elements ####
 
     #This whole seeding part might be done prettier later. 
     #Ask Knut-Frode for some tips here, so that I don't seed with a for loop
@@ -159,13 +177,15 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
                                     z=_z,
                                     number=N,
                                     time=time)
-        
+    
+    #### Run OpenDrift ####
     o.run(duration=timedelta(hours=duration),
           time_step=timedelta(minutes=time_step),
           time_step_output=timedelta(minutes=time_step_output),
           outfile=outfile
           )
     
+    #### Postprocess ####
     if density_grid is not None and isinstance(density_grid, int):
         concentration(outfile, density_grid)
 
