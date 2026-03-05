@@ -27,7 +27,7 @@ run_opendrift(
     duration=5,
     time_step=30,
     time_step_output=60,
-    outfile='test_geojson.nc',
+    outfile='test_geojson_c.nc',
     horizontal_diffusivity=0,
     coastline='Model',
     vertical_mixing=False,

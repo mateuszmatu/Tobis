@@ -8,7 +8,7 @@ run_opendrift(
     start_time=time,
     geojson='/home/mateuszm/Tobis/tobis_singlepart.geojson',
     z = -5,
-    duration=1,
+    duration=48,
     time_step=30,
     time_step_output=60,
     outfile=f'/home/mateuszm/Tobis/netcdf/{time}.nc',
