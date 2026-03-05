@@ -96,7 +96,7 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
     o.set_config('drift:advection_scheme', 'runge-kutta4')
 
     if start_time is None:
-        start_time = [r.start_time]
+        start_time = [r[0].start_time]
     elif isinstance(start_time, str):
         try:
             start_time = [datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')]
@@ -112,32 +112,15 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
     
     if isinstance(z, float) or isinstance(z, int):
         z = [z]
+    elif isinstance(z, list):
+        z = z
     elif isinstance(z, np.ndarray):
         z = list(z)
 
     #This whole seeding part might be done prettier later. 
-    seeded=False
+    #Ask Knut-Frode for some tips here, so that I don't seed with a for loop
     if lon is not None and lat is not None:
         print('Using positions from provided lon lat')
-    elif rls is not None:
-        import pandas as pd
-        print('Using positions from provided .rls file')
-        #From Knut-Frode, testing with provided file
-        p = pd.read_csv(rls, sep='\t', names=['time', 'lon', 'lat', 'a'])
-        lon, lat = p['lon'], p['lat']
-    elif geojson is not None:
-        print('Using positions from provided .geojson file')
-        #From Knut-Frode
-        import geopandas as gdp
-        gdf = gdp.read_file(geojson)
-        for t in start_time:
-            o.seed_from_gropandas(gdf,
-                                  z=z*N,
-                                  number=N*len(z),
-                                  time=t)
-        seeded=True
-    
-    if lon is not None and lat is not None and seeded is False:
         for t in start_time:
             o.seed_elements(lon=lon,
                             lat=lat,
@@ -145,6 +128,32 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
                             number=N*len(z),
                             radius=radius,
                             time=t)
+    elif rls is not None:
+        import pandas as pd
+        print('Using positions from provided .rls file')
+        #From Knut-Frode, testing with provided file
+        p = pd.read_csv(rls, sep='\t', names=['time', 'lon', 'lat', 'a'])
+        if start_time is None:
+            start_time = pd.to_datetime(p['time']).dt.to_pydatetime()
+        for _z in z:
+            o.seed_elements(lon=p['lon'],
+                            lat=p['lat'],
+                            time=start_time,
+                            z=_z)
+        #o.seed_elements(lon=p['lon'], lat=p['lat'], time=pd.to_datetime(p['time']).dt.to_pydatetime())
+
+    #this seems to be slower than rls    
+    elif geojson is not None:
+        print('Using positions from provided .geojson file')
+        #From Knut-Frode
+        import geopandas as gdp
+        gdf = gdp.read_file(geojson)
+        for _z in z:
+            for t in start_time:
+                o.seed_from_geopandas(gdf,
+                                    z=_z,
+                                    number=N,
+                                    time=t)
         
     o.run(duration=timedelta(hours=duration),
           time_step=timedelta(minutes=time_step),
