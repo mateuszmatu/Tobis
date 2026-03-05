@@ -9,7 +9,7 @@ from opendrift.models.oceandrift import OceanDrift
 from datetime import datetime, timedelta
 import os
 
-def run_opendrift(file, lon, lat, z=0, N=1, radius=0, start_time=None, duration=12, time_step=30, time_step_output=60, outfile='sample_file.nc', depth_type='z', vertical_mixing=False, horizontal_diffusivity=0, coastline=None, track_vars=None, density_grid=None):
+def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, radius=0, start_time=None, duration=12, time_step=30, time_step_output=60, outfile='sample_file.nc', depth_type='z', vertical_mixing=False, horizontal_diffusivity=0, coastline=None, track_vars=None, density_grid=None):
     """
         A wrapper for running OpenDrift. https://opendrift.github.io/
     Args:
@@ -114,14 +114,37 @@ def run_opendrift(file, lon, lat, z=0, N=1, radius=0, start_time=None, duration=
         z = [z]
     elif isinstance(z, np.ndarray):
         z = list(z)
+
+    #This whole seeding part might be done prettier later. 
+    seeded=False
+    if lon is not None and lat is not None:
+        print('Using positions from provided lon lat')
+    elif rls is not None:
+        import pandas as pd
+        print('Using positions from provided .rls file')
+        #From Knut-Frode, testing with provided file
+        p = pd.read_csv(rls, sep='\t', names=['time', 'lon', 'lat', 'a'])
+        lon, lat = p['lon'], p['lat']
+    elif geojson is not None:
+        print('Using positions from provided .geojson file')
+        #From Knut-Frode
+        import geopandas as gdp
+        gdf = gdp.read_file(geojson)
+        for t in start_time:
+            o.seed_from_gropandas(gdf,
+                                  z=z*N,
+                                  number=N*len(z),
+                                  time=t)
+        seeded=True
     
-    for t in start_time:
-        o.seed_elements(lon=lon,
-                        lat=lat,
-                        z=z*N,
-                        number=N*len(z),
-                        radius=radius,
-                        time=t)
+    if lon is not None and lat is not None and seeded is False:
+        for t in start_time:
+            o.seed_elements(lon=lon,
+                            lat=lat,
+                            z=z*N,
+                            number=N*len(z),
+                            radius=radius,
+                            time=t)
         
     o.run(duration=timedelta(hours=duration),
           time_step=timedelta(minutes=time_step),
