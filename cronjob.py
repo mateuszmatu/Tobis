@@ -6,7 +6,7 @@ time = datetime.now()
 run_opendrift(
     file = 'https://thredds.met.no/thredds/dodsC/fou-hi/norkystv3_800m_m00_be',
     start_time=time,
-    geojson='/home/mateuszm/Tobis/tobis_singlepart.geojson',
+    geojson='/home/mateuszm/Tobis/tobis/tobis_singlepart.geojson',
     z = -5,
     duration=48,
     time_step=30,
