@@ -65,19 +65,21 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
                 )
 
     #### Load reader ####
-    if os.path.isdir(file):
-        file = file+'/*'
-    elif os.path.exists(file) or 'thredds' in file:
+    if isinstance(file, list):
         pass
+    elif os.path.isdir(file):
+        file = [file+'/*']
+    elif os.path.exists(file) or 'thredds' in file:
+        file = [file]
     else:
         raise ValueError(f'File or directory {file} not found.')
         
     if depth_type == 'z':
         from opendrift.readers import reader_netCDF_CF_generic
-        r = [reader_netCDF_CF_generic.Reader(file)]
+        r = [reader_netCDF_CF_generic.Reader(f) for f in file]
     elif depth_type == 's':
         from opendrift.readers import reader_ROMS_native
-        r = [reader_ROMS_native.Reader(file)]
+        r = [reader_ROMS_native.Reader(f) for f in file]
     else:
         raise ValueError(f'Supported depth types are [z, s], got {depth_type}')
 
@@ -148,7 +150,7 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
                         z=z*N*len(start_time),
                         number=N*len(z)*len(start_time),
                         radius=radius,
-                        time=start_time*len(z))
+                        time=start_time*len(z)*N)
         
     elif rls is not None:
         import pandas as pd
