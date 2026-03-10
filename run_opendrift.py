@@ -33,6 +33,22 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
     """
     #TODO consider moving some parts into its own functions as the script is becoming quite long
     
+    #### Particle Type ####
+    #General tracers
+    if particle_type is None or particle_type == 'tracer':
+        from opendrift.models.oceandrift import OceanDrift
+        o = OceanDrift(
+            loglevel=20,
+            seed=0
+        )
+
+    #Fish Eggs and Larvea
+    if particle_type == 'LarvalFish':
+        from opendrift.models.larvalfish import LarvalFish
+        o = LarvalFish(
+            loglevel=50
+        )
+    
     #### Track additional variables #### (KF said there is a better way)
     if track_vars is not None:
         if isinstance(track_vars, str):
@@ -47,22 +63,6 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
                         var: {'fallback': -999} 
                     }
                 )
-    
-    #### Particle Type ####
-    #General tracers
-    if particle_type is None or particle_type == 'tracer':
-        from opendrift.models.oceandrift import OceanDrift
-        o = OceanDrift(
-            loglevel=50,
-            seed=0
-        )
-
-    #Fish Eggs and Larvea
-    if particle_type == 'LarvalFish':
-        from opendrift.models.larvalfish import LarvalFish
-        o = LarvalFish(
-            loglevel=50
-        )
 
     #### Load reader ####
     if os.path.isdir(file):
