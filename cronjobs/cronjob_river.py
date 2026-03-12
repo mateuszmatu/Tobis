@@ -37,7 +37,7 @@ for index, river in rivers.iterrows():
     outfile=f'/lustre/storeB/users/mateuszm/thredds/oper/{river['river']}/{river['river']}_{start.year}{start.month:02d}{start.day:02d}.nc',
     horizontal_diffusivity=0,
     coastline='Model',
-    N=50,
+    N=1000,
     radius=30,
     depth_type='s',
     track_vars=['sea_water_temperature', 'sea_water_salinity'],
