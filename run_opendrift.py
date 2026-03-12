@@ -100,7 +100,6 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
             from opendrift.readers import reader_shape
             for c in coastline:
                 r.append(reader_shape.Reader.from_shpfiles(c))
-                
     o.add_reader(r)
     
     #### Config options ####
@@ -184,7 +183,8 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
     o.run(duration=timedelta(hours=duration),
           time_step=timedelta(minutes=time_step),
           time_step_output=timedelta(minutes=time_step_output),
-          outfile=outfile
+          outfile=outfile,
+          export_buffer_length=50,
           )
     
     #### Postprocess ####
