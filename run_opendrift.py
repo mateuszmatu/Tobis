@@ -35,10 +35,11 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
     
     #### Particle Type ####
     #General tracers
+    loglevel=20
     if particle_type is None or particle_type == 'tracer':
         from opendrift.models.oceandrift import OceanDrift
         o = OceanDrift(
-            loglevel=20,
+            loglevel=loglevel,
             seed=0
         )
 
@@ -46,7 +47,8 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
     if particle_type == 'LarvalFish':
         from opendrift.models.larvalfish import LarvalFish
         o = LarvalFish(
-            loglevel=20
+            loglevel=loglevel,
+            seed=0
         )
     
     #### Track additional variables #### (KF said there is a better way)
@@ -105,7 +107,7 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
     #### Config options ####
     o.set_config('general:seafloor_action', 'lift_to_seafloor')
     o.set_config('general:coastline_action', 'previous')
-    o.set_config('drift:horizontal_diffusivity', horizontal_diffusivity)
+    #o.set_config('environment:constant:horizontal_diffusivity', horizontal_diffusivity)
     o.set_config('drift:vertical_mixing', vertical_mixing)
     o.set_config('drift:vertical_advection', vertical_advection)
     o.set_config('vertical_mixing:diffusivitymodel', 'environment')
