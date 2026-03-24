@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 import os
 import numpy as np
 
-def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, radius=0, start_time=None, duration=12, time_step=30, time_step_output=60, outfile='sample_file.nc', depth_type='z', vertical_mixing=False, vertical_advection=False, horizontal_diffusivity=0, coastline=None, track_vars=None, density_grid=None, max_age_seconds=None, particle_type=None):
+def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, radius=0, start_time=None, duration=12, time_step=30, time_step_output=60, outfile='sample_file.nc', depth_type='z', vertical_mixing=False, vertical_advection=False, horizontal_diffusivity=0, coastline=None, track_vars=None, density_grid=None, max_age_seconds=None, particle_type=None, egg_advection=None):
     """
         A wrapper for running OpenDrift. https://opendrift.github.io/
     Args:
@@ -46,7 +46,7 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
     if particle_type == 'LarvalFish':
         from opendrift.models.larvalfish import LarvalFish
         o = LarvalFish(
-            loglevel=50
+            loglevel=20
         )
     
     #### Track additional variables #### (KF said there is a better way)
@@ -113,6 +113,9 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
     
     if max_age_seconds is not None:
         o.set_config('drift:max_age_seconds', max_age_seconds)
+
+    if particle_type=='LarvalFish' and egg_advection is not None:
+        o.set_config('drift:egg_advection', egg_advection)
 
     #### Start time ####
     if start_time is None:
