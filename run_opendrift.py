@@ -92,7 +92,6 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
         if not isinstance(coastline, list) and not all(isinstance(item, str) for item in coastline):
             raise TypeError('Argument coastline must be either a string or a list of strings.')
         
-        # BUG For some reason this changes loglevel to 10
         o.set_config("general:use_auto_landmask", False)
         o.set_config("environment:fallback:land_binary_mask", 0)
             
