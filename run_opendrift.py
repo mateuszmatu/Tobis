@@ -2,8 +2,8 @@
 Author: Mateusz Matuszak
 """
 
-import sys
-sys.path.insert(0, str("submodules/opendrift"))
+#import sys
+#sys.path.insert(0, str("submodules/opendrift"))
 
 from datetime import datetime, timedelta
 import os
@@ -51,7 +51,7 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
             seed=0
         )
     
-    #### Track additional variables #### (KF said there is a better way)
+    ### Track additional variables #### (KF said there is a better way)
     if track_vars is not None:
         if isinstance(track_vars, str):
             track_vars = [track_vars]
@@ -62,7 +62,7 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
             for var in track_vars:
                 OceanDrift.required_variables.update(
                     {
-                        var: {'fallback': -999} 
+                        var: {'fallback': 0} 
                     }
                 )
 
@@ -92,6 +92,7 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
         if not isinstance(coastline, list) and not all(isinstance(item, str) for item in coastline):
             raise TypeError('Argument coastline must be either a string or a list of strings.')
         
+        # BUG For some reason this changes loglevel to 10
         o.set_config("general:use_auto_landmask", False)
         o.set_config("environment:fallback:land_binary_mask", 0)
             
