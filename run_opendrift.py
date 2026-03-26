@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 import os
 import numpy as np
 
-def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, radius=0, start_time=None, duration=12, time_step=30, time_step_output=60, outfile='sample_file.nc', depth_type='z', vertical_mixing=False, vertical_advection=False, horizontal_diffusivity=0, coastline=None, track_vars=None, density_grid=None, max_age_seconds=None, particle_type=None, egg_advection=None):
+def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, netCDF=None, z=0, N=1, radius=0, start_time=None, duration=12, time_step=30, time_step_output=60, outfile='sample_file.nc', depth_type='z', vertical_mixing=False, vertical_advection=False, horizontal_diffusivity=0, coastline=None, track_vars=None, density_grid=None, max_age_seconds=None, particle_type=None, egg_advection=None):
     """
         A wrapper for running OpenDrift. https://opendrift.github.io/
     Args:
@@ -145,6 +145,9 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
 
     #### Seeding elements ####
 
+    if netCDF is not None:
+        o.seed_from_file(netCDF)
+
     #This whole seeding part might be done prettier later. 
     #Ask Knut-Frode for some tips here, so that I don't seed with a for loop
     if lon is not None and lat is not None:
@@ -156,7 +159,7 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
                         radius=radius,
                         time=start_time*len(z)*N)
         
-    elif rls is not None:
+    if rls is not None:
         import pandas as pd
         print('Using positions from provided .rls file')
         #From Knut-Frode, testing with provided file
@@ -170,7 +173,7 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, z=0, N=1, ra
                             time=start_time,
                             z=_z)
 
-    elif geojson is not None:
+    if geojson is not None:
         print('Using positions from provided .geojson file')
         #From Knut-Frode
         import geopandas as gdp
