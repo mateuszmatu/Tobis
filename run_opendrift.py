@@ -9,27 +9,34 @@ from datetime import datetime, timedelta
 import os
 import numpy as np
 
-def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, netCDF=None, z=0, N=1, radius=0, start_time=None, duration=12, time_step=30, time_step_output=60, outfile='sample_file.nc', depth_type='z', vertical_mixing=False, vertical_advection=False, horizontal_diffusivity=0, coastline=None, track_vars=None, density_grid=None, max_age_seconds=None, particle_type=None, egg_advection=None):
+def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, netCDF=None, z=0, N=1, radius=0, start_time=None, duration=12, time_step=30, time_step_output=60, outfile='sample_file.nc', depth_type='z', vertical_mixing=False, vertical_advection=False, coastline=None, track_vars=None, density_grid=None, max_age_seconds=None, particle_type=None, egg_advection=None):
     """
         A wrapper for running OpenDrift. https://opendrift.github.io/
+        NOTE: Function starting to grow pretty long with many args. Maybe split up into smaller parts. 
     Args:
-        file                    [str]               :   Model netCDF file containing ocean current data.    
-        lon                     [float]             :   Initial longitude position.
-        lat                     [float]             :   Initial latitude position.
-        z                       [float|int|list]    :   Initial depth in meters.
-        N                       [int]               :   Number of particles. Scales lineary with number of seeding depths. 
-        radius                  [float]             :   Particle seeding radius around initial lon and lat. 
-        start_time              [str]               :   Start time following %Y-%m-%dT%H:%M:%S format. 
-        duration                [int]               :   Simulation duration in hours.
-        time_step               [int]               :   Simulation time step in minutes. 
-        time_step_output        [int]               :   Output frequency in minutes.
-        outfile                 [str]               :   Name of output file. 
-        depth_type              [str]               :   Vertical grid type of provided dataset. Currently supports 'z' and 's'. 
-        vertical_mixing         [bool]              :   Set to True to allow particles to propagate vertically. False otherwise. 
-        horizontal_diffusivity  [float]             :   Value for horizontal diffusivity. 
-        coastline               [str|list]          :   Add a custom coastline. Defaults to coastline from GSHHG. If set to "Model" will use model landmask. 
-        track_vars              [str|list]          :   Keep track of additional variables along particle trajectory. NOTE: this variable naming is very strict and predefined in OpenDrift code. See OpenDrift.readers for permitted variables and names. E.g. https://github.com/OpenDrift/opendrift/blob/master/opendrift/readers/reader_ROMS_native.py
-        density_grid            [int]               :   Create a density map of particles. This arg specifies grid size for map. 
+        file                [str]                           :   Model netCDF file containing ocean current data.
+        lon                 [float]                         :   Longitude seed position
+        lat                 [float]                         :   Latitude seed position
+        rls                 [str]                           :   .rls file with seed positions
+        geojson             [str]                           :   .geojson file with seed positions
+        netCDF              [str]                           :   result file from previous OpenDrift run
+        z                   [float|list]                    :   Seed depth
+        N                   [int]                           :   Number of particles. Scales with length of seed depths.
+        radius              [float]                         :   Seed radius.
+        start_time          [str|datetime|list of datetime] :   Start time(s). String must follow %Y-%m-%dT%H:%M:%S format
+        duration            [int]                           :   Simulation duration hours.
+        time_step           [int]                           :   Simulation time step minutes
+        time_step_output    [int]                           :   Output frequency minutes
+        outfile             [str]                           :   Name of output file
+        depth_type          [str]                           :   Vertical grid type of provided ocean current data. 'z' or 's'
+        vertical_mixing     [bool]                          :   Turn on vertical mixing
+        vertical_advection  [bool]                          :   Turn on vertical advection
+        coastline           [str|list]                      :   Custom coastline (landmask). "Model" will use model landmask. 
+        track_vars          [str|list]                      :   Track additional variables along trajectory. Strict naming, see https://github.com/OpenDrift/opendrift/blob/master/opendrift/readers/reader_ROMS_native.py
+        density_grid        [int]                           :   Create density map of trajectories with specified grid size.
+        max_age_seconds     [int]                           :   Particle lifetime.
+        particle_type       [str]                           :   OceanDrift or LarvalFish
+        egg_advection       [bool]                       :   LarvalFish eggs advected or not. 
     """
     #TODO consider moving some parts into its own functions as the script is becoming quite long
     
