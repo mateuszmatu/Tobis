@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 import os
 import numpy as np
 
-def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, netCDF=None, z=0, N=1, radius=0, start_time=None, duration=12, time_step=30, time_step_output=60, outfile='sample_file.nc', depth_type='z', vertical_mixing=False, vertical_advection=False, coastline=None, track_vars=None, density_grid=None, max_age_seconds=None, particle_type=None, egg_advection=None):
+def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, netCDF=None, traj_time_index=-1, z=0, N=1, radius=0, start_time=None, duration=12, time_step=30, time_step_output=60, outfile='sample_file.nc', depth_type='z', vertical_mixing=False, vertical_advection=False, coastline=None, track_vars=None, density_grid=None, max_age_seconds=None, particle_type=None, egg_advection=None):
     """
         A wrapper for running OpenDrift. https://opendrift.github.io/
         NOTE: Function starting to grow pretty long with many args. Maybe split up into smaller parts. 
@@ -20,6 +20,7 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, netCDF=None,
         rls                 [str]                           :   .rls file with seed positions
         geojson             [str]                           :   .geojson file with seed positions
         netCDF              [str]                           :   result file from previous OpenDrift run
+        traj_time_index     [int]                           :   Time index of netCDF file. 
         z                   [float|list]                    :   Seed depth
         N                   [int]                           :   Number of particles. Scales with length of seed depths.
         radius              [float]                         :   Seed radius.
@@ -152,9 +153,6 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, netCDF=None,
 
     #### Seeding elements ####
 
-    if netCDF is not None:
-        o.seed_from_file(netCDF)
-
     #This whole seeding part might be done prettier later. 
     #Ask Knut-Frode for some tips here, so that I don't seed with a for loop
     if lon is not None and lat is not None:
@@ -193,6 +191,9 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, netCDF=None,
                                     z=_z,
                                     number=N,
                                     time=time)
+    
+    if netCDF is not None:
+        o.seed_from_file(netCDF, trajectory_time_index=traj_time_index)
     
     #### Run OpenDrift ####
     o.run(duration=timedelta(hours=duration),
