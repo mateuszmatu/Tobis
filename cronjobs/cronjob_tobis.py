@@ -42,6 +42,7 @@ run_opendrift(
     time_step=30,
     time_step_output=60,
     outfile=output,
+    traj_time_index=24,
     N=10000,
     particle_type='LarvalFish',
     egg_advection=False,
