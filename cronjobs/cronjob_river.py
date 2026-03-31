@@ -35,7 +35,6 @@ for index, river in rivers.iterrows():
     time_step=15,
     time_step_output=60,
     outfile=f'/lustre/storeB/users/mateuszm/thredds/oper/{river['river']}/{river['river']}_{start.year}{start.month:02d}{start.day:02d}.nc',
-    horizontal_diffusivity=0,
     coastline='Model',
     N=1000,
     radius=30,
