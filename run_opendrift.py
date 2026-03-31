@@ -233,7 +233,7 @@ def concentration(file, density_grid):
     return ds
 
 if __name__ == "__main__":
-    #TODO allow a list of lons, lats and z
+    #TODO update this
     import argparse
     parser = argparse.ArgumentParser(
         prog='opendrift'
