@@ -18,6 +18,8 @@ file_list = [
     path+f'norkyst160_his_sdepth_{start.year}{start.month:02d}{start.day:02d}T00Z_m71_AN.nc',
     path+f'norkyst160_his_sdepth_{start.year}{start.month:02d}{start.day:02d}T00Z_m71_FC_0001.nc',
     path+f'norkyst160_his_sdepth_{start.year}{start.month:02d}{start.day:02d}T00Z_m71_FC_0002.nc',
+    path+f'norkyst160_his_sdepth_{start.year}{start.month:02d}{start.day:02d}T00Z_m70_AN.nc',
+    path+f'norkyst160_his_sdepth_{start.year}{start.month:02d}{start.day:02d}T00Z_m70_FC_0001.nc',
     path+f'norkyst800_his_sdepth_{start.year}{start.month:02d}{start.day:02d}T00Z_m00_AN.nc',
     path+f'norkyst800_his_sdepth_{start.year}{start.month:02d}{start.day:02d}T00Z_m00_FC_0001.nc',
     path+f'norkyst800_his_sdepth_{start.year}{start.month:02d}{start.day:02d}T00Z_m00_FC_0002.nc'
