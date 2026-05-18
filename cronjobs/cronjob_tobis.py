@@ -46,5 +46,6 @@ run_opendrift(
     N=1000,
     particle_type='LarvalFish',
     egg_advection=False,
+    max_age_seconds=24 * 30 * 3 * 3600, # 3 months
     #density_grid=800,
 )
