@@ -37,7 +37,7 @@ run_opendrift(
     start_time=times,
     geojson=geojson,
     netCDF=netCDF,
-    z = -5,
+    z = 'seafloor+1',
     duration=24 * 3, # 3 days
     time_step=30,
     time_step_output=60,
