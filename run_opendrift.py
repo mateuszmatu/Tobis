@@ -144,7 +144,7 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, netCDF=None,
         raise TypeError('Type of start_time is not supported.')
     
     #### Depth ####
-    if isinstance(z, float) or isinstance(z, int):
+    if isinstance(z, float) or isinstance(z, int) or isinstance(z, str):
         z = [z]
     elif isinstance(z, list):
         z = z
