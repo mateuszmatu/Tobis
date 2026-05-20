@@ -8,6 +8,9 @@ Author: Mateusz Matuszak
 from datetime import datetime, timedelta
 import os
 import numpy as np
+import logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, netCDF=None, traj_time_index=-1, z=0, N=1, radius=0, start_time=None, duration=12, time_step=30, time_step_output=60, outfile='sample_file.nc', depth_type='z', vertical_mixing=False, vertical_advection=False, coastline=None, track_vars=None, density_grid=None, max_age_seconds=None, particle_type=None, egg_advection=None):
     """
@@ -45,6 +48,7 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, netCDF=None,
     #General tracers
     loglevel=20
     if particle_type is None or particle_type == 'tracer':
+        logger.info('Using general particle type OceanDrift')
         from opendrift.models.oceandrift import OceanDrift
         o = OceanDrift(
             loglevel=loglevel,
@@ -54,7 +58,17 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, netCDF=None,
     #Fish Eggs and Larvea
     if particle_type == 'LarvalFish':
         from opendrift.models.larvalfish import LarvalFish
+        logger.info('Using particle type LarvalFish')
         o = LarvalFish(
+            loglevel=loglevel,
+            seed=0
+        )
+    
+    #Tobis specific particle type
+    if particle_type == 'Tobis':
+        logger.info('Using particle type Tobis')
+        from opendrift.models.tobis import Tobis
+        o = Tobis(
             loglevel=loglevel,
             seed=0
         )
@@ -156,7 +170,7 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, netCDF=None,
     #This whole seeding part might be done prettier later. 
     #Ask Knut-Frode for some tips here, so that I don't seed with a for loop
     if lon is not None and lat is not None:
-        print('Using positions from provided lon lat')
+        logger.info('Using positions from provided lon lat')
         o.seed_elements(lon=lon,
                         lat=lat,
                         z=z*N*len(start_time),
@@ -166,7 +180,7 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, netCDF=None,
         
     if rls is not None:
         import pandas as pd
-        print('Using positions from provided .rls file')
+        logger.info('Using positions from provided .rls file')
         #From Knut-Frode, testing with provided file
         p = pd.read_csv(rls, sep='\t', names=['time', 'lon', 'lat', 'a'])
         
@@ -179,7 +193,7 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, netCDF=None,
                             z=_z)
 
     if geojson is not None:
-        print('Using positions from provided .geojson file')
+        logger.info('Using positions from provided .geojson file')
         #From Knut-Frode
         import geopandas as gdp
         gdf = gdp.read_file(geojson)
