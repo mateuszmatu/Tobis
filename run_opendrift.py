@@ -132,6 +132,8 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, netCDF=None,
     #o.set_config('environment:constant:horizontal_diffusivity', horizontal_diffusivity)
     o.set_config('drift:vertical_mixing', vertical_mixing)
     o.set_config('drift:vertical_advection', vertical_advection)
+    o.set_config('drift:vertical_mixing_at_surface', vertical_mixing)
+    o.set_config('drift:vertical_advection_at_surface', vertical_advection)
     o.set_config('vertical_mixing:diffusivitymodel', 'environment')
     o.set_config('drift:advection_scheme', 'runge-kutta4')
     
