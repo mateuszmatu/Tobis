@@ -140,7 +140,7 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, netCDF=None,
     if max_age_seconds is not None:
         o.set_config('drift:max_age_seconds', max_age_seconds)
 
-    if particle_type=='LarvalFish' and egg_advection is not None:
+    if particle_type=='LarvalFish' and egg_advection is not None or particle_type=='Tobis' and egg_advection is not None:
         o.set_config('drift:egg_advection', egg_advection)
 
     #### Start time ####
