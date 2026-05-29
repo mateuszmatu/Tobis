@@ -12,7 +12,7 @@ import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, netCDF=None, traj_time_index=-1, z=0, N=1, radius=0, start_time=None, duration=12, time_step=30, time_step_output=60, outfile='sample_file.nc', depth_type='z', vertical_mixing=False, vertical_advection=False, coastline=None, track_vars=None, density_grid=None, max_age_seconds=None, particle_type=None, egg_advection=None):
+def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, netCDF=None, traj_time_index=-1, z=0, N=1, radius=0, start_time=None, duration=12, time_step=30, time_step_output=60, outfile='sample_file.nc', depth_type='z', vertical_mixing=False, vertical_advection=False, coastline=None, track_vars=None, density_grid=None, max_age_seconds=None, particle_type=None, egg_advection=None, **kwargs):
     """
         A wrapper for running OpenDrift. https://opendrift.github.io/
         NOTE: Function starting to grow pretty long with many args. Maybe split up into smaller parts. 
@@ -178,7 +178,8 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, netCDF=None,
                         z=z*N*len(start_time),
                         number=N*len(z)*len(start_time),
                         radius=radius,
-                        time=start_time*len(z)*N)
+                        time=start_time*len(z)*N,
+                        **kwargs)
         
     if rls is not None:
         import pandas as pd
@@ -192,7 +193,8 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, netCDF=None,
             o.seed_elements(lon=p['lon'],
                             lat=p['lat'],
                             time=start_time,
-                            z=_z)
+                            z=_z,
+                            **kwargs)
 
     if geojson is not None:
         logger.info('Using positions from provided .geojson file')
@@ -206,7 +208,8 @@ def run_opendrift(file, lon=None, lat=None, rls=None, geojson=None, netCDF=None,
                 o.seed_from_geopandas(gdf,
                                     z=_z,
                                     number=N,
-                                    time=time)
+                                    time=time,
+                                    **kwargs)
     
     if netCDF is not None:
         o.seed_from_file(netCDF, trajectory_time_index=traj_time_index)
