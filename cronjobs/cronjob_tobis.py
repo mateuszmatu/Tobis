@@ -48,6 +48,8 @@ run_opendrift(
     particle_type='Tobis',
     egg_advection=False,
     max_age_seconds=24 * 30 * 3 * 3600, # 3 months
+    vertical_advection=True, 
+    vertical_mixing=True,
     #density_grid=800,
     **{'hatch_rate': np.random.rand(5)}
 )
