@@ -18,6 +18,7 @@ file_list = [
     path+f'norkyst800_his_zdepth_{start.year}{start.month:02d}{start.day:02d}T00Z_m00_FC_0003.nc',
     path+f'norkyst800_his_zdepth_{start.year}{start.month:02d}{start.day:02d}T00Z_m00_FC_0004.nc',
     path+f'norkyst800_his_zdepth_{start.year}{start.month:02d}{start.day:02d}T00Z_m00_FC_0005.nc',
+    'https://thredds.met.no/thredds/dodsC/cmems/topaz6/dataset-topaz6-arc-15min-3km-be.ncml'
 ]
 
 previous = start - timedelta(days=1)
@@ -44,8 +45,9 @@ run_opendrift(
     outfile=output,
     traj_time_index=24,
     N=1000,
-    particle_type='LarvalFish',
+    particle_type='Tobis',
     egg_advection=False,
     max_age_seconds=24 * 30 * 3 * 3600, # 3 months
     #density_grid=800,
+    **{'hatch_rate': np.random.rand(5)}
 )
