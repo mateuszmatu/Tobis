@@ -51,5 +51,5 @@ run_opendrift(
     vertical_advection=True, 
     vertical_mixing=True,
     #density_grid=800,
-    **{'hatch_rate': np.random.rand(5)}
+    **{'hatch_rate': np.random.rand(1000)}
 )
