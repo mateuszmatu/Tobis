@@ -5,6 +5,7 @@ from run_opendrift import run_opendrift
 import numpy as np
 from datetime import datetime, timedelta
 import pandas as pd
+import os
 
 rivers = pd.read_csv('/home/mateuszm/Tobis/rivers/rivers_adjusted.csv')
 
@@ -46,3 +47,7 @@ for index, river in rivers.iterrows():
     vertical_mixing=True,
     vertical_advection=True
     )
+
+    if os.path.exists(f'/lustre/storeB/users/mateuszm/thredds/oper/{river["river"]}/{river["river"]}_latest.nc'):
+        os.system(f'rm /lustre/storeB/users/mateuszm/thredds/oper/{river["river"]}/{river["river"]}_latest.nc')
+    os.system(f'ln -s /lustre/storeB/users/mateuszm/thredds/oper/{river["river"]}/{river["river"]}_{start.year}{start.month:02d}{start.day:02d}.nc /lustre/storeB/users/mateuszm/thredds/oper/{river["river"]}/{river["river"]}_latest.nc')
