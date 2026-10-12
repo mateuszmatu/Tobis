@@ -48,6 +48,6 @@ for index, river in rivers.iterrows():
     vertical_advection=True
     )
 
-    if os.path.exists(f'/lustre/storeB/users/mateuszm/thredds/oper/{river["river"]}/{river["river"]}_latest.nc'):
-        os.system(f'rm /lustre/storeB/users/mateuszm/thredds/oper/{river["river"]}/{river["river"]}_latest.nc')
-    os.system(f'ln -s /lustre/storeB/users/mateuszm/thredds/oper/{river["river"]}/{river["river"]}_{start.year}{start.month:02d}{start.day:02d}.nc /lustre/storeB/users/mateuszm/thredds/oper/{river["river"]}/{river["river"]}_latest.nc')
+    if os.path.exists(f'/lustre/storeB/users/mateuszm/thredds/oper/{river["river"]}_latest.nc'):
+        os.system(f'rm /lustre/storeB/users/mateuszm/thredds/oper/{river["river"]}_latest.nc')
+    os.system(f'ln -s /lustre/storeB/users/mateuszm/thredds/oper/{river["river"]}/{river["river"]}_{start.year}{start.month:02d}{start.day:02d}.nc /lustre/storeB/users/mateuszm/thredds/oper/{river["river"]}_latest.nc')
